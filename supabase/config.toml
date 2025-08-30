@@ -1,1 +1,7 @@
 project_id = "upiskwyxcqcczbukmehj"
+
+[functions.cv-chat]
+verify_jwt = false
+
+[functions.generate-cv]
+verify_jwt = false
