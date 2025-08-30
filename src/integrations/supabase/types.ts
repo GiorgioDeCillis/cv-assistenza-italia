@@ -14,7 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cv_sessions: {
+        Row: {
+          chat_history: Json | null
+          created_at: string
+          generated_cv: Json | null
+          id: string
+          updated_at: string
+          user_language: string
+        }
+        Insert: {
+          chat_history?: Json | null
+          created_at?: string
+          generated_cv?: Json | null
+          id?: string
+          updated_at?: string
+          user_language: string
+        }
+        Update: {
+          chat_history?: Json | null
+          created_at?: string
+          generated_cv?: Json | null
+          id?: string
+          updated_at?: string
+          user_language?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
