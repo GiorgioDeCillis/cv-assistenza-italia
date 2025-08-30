@@ -124,9 +124,17 @@ serve(async (req) => {
     let cvData;
     
     try {
-      cvData = JSON.parse(data.choices[0].message.content);
+      let content = data.choices[0].message.content;
+      
+      // Remove markdown code blocks if present
+      if (content.includes('```json')) {
+        content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      }
+      
+      cvData = JSON.parse(content);
     } catch (parseError) {
       console.error('Failed to parse CV JSON:', parseError);
+      console.error('Raw content:', data.choices[0].message.content);
       throw new Error('Failed to generate structured CV');
     }
 

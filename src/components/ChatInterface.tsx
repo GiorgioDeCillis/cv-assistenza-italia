@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2, Send, Download, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import jsPDF from 'jspdf';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,6 +17,178 @@ interface ChatInterfaceProps {
   language: { code: string; name: string; flag: string; nativeName: string };
   onBack: () => void;
 }
+
+interface CVData {
+  personalInfo: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    nationality: string;
+  };
+  professionalSummary: string;
+  workExperience: Array<{
+    position: string;
+    company: string;
+    location: string;
+    period: string;
+    description: string;
+  }>;
+  skills: string[];
+  languages: Array<{
+    language: string;
+    level: string;
+  }>;
+  education: Array<{
+    title: string;
+    institution: string;
+    year: string;
+    location: string;
+  }>;
+  references: string;
+}
+
+const generatePDF = (cvData: CVData) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.width;
+  const margin = 20;
+  const lineHeight = 6;
+  let yPosition = 20;
+
+  // Title
+  doc.setFontSize(24);
+  doc.setFont('helvetica', 'bold');
+  doc.text(cvData.personalInfo.name || 'Curriculum Vitae', margin, yPosition);
+  yPosition += 15;
+
+  // Contact Info
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  const contactInfo = [
+    cvData.personalInfo.phone && `Tel: ${cvData.personalInfo.phone}`,
+    cvData.personalInfo.email && `Email: ${cvData.personalInfo.email}`,
+    cvData.personalInfo.address && `Indirizzo: ${cvData.personalInfo.address}`,
+    cvData.personalInfo.nationality && `Nazionalità: ${cvData.personalInfo.nationality}`
+  ].filter(Boolean);
+
+  contactInfo.forEach(info => {
+    doc.text(info!, margin, yPosition);
+    yPosition += lineHeight;
+  });
+  yPosition += 5;
+
+  // Professional Summary
+  if (cvData.professionalSummary) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PROFILO PROFESSIONALE', margin, yPosition);
+    yPosition += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const summaryLines = doc.splitTextToSize(cvData.professionalSummary, pageWidth - 2 * margin);
+    doc.text(summaryLines, margin, yPosition);
+    yPosition += summaryLines.length * lineHeight + 5;
+  }
+
+  // Work Experience
+  if (cvData.workExperience && cvData.workExperience.length > 0) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ESPERIENZA LAVORATIVA', margin, yPosition);
+    yPosition += 8;
+
+    cvData.workExperience.forEach(exp => {
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(exp.position, margin, yPosition);
+      yPosition += lineHeight;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${exp.company} - ${exp.location}`, margin, yPosition);
+      yPosition += lineHeight;
+      doc.text(exp.period, margin, yPosition);
+      yPosition += lineHeight;
+      
+      if (exp.description) {
+        const descLines = doc.splitTextToSize(exp.description, pageWidth - 2 * margin);
+        doc.text(descLines, margin, yPosition);
+        yPosition += descLines.length * lineHeight;
+      }
+      yPosition += 5;
+    });
+  }
+
+  // Skills
+  if (cvData.skills && cvData.skills.length > 0) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('COMPETENZE', margin, yPosition);
+    yPosition += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const skillsText = cvData.skills.join(' • ');
+    const skillsLines = doc.splitTextToSize(skillsText, pageWidth - 2 * margin);
+    doc.text(skillsLines, margin, yPosition);
+    yPosition += skillsLines.length * lineHeight + 5;
+  }
+
+  // Languages
+  if (cvData.languages && cvData.languages.length > 0) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LINGUE', margin, yPosition);
+    yPosition += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    cvData.languages.forEach(lang => {
+      doc.text(`${lang.language}: ${lang.level}`, margin, yPosition);
+      yPosition += lineHeight;
+    });
+    yPosition += 5;
+  }
+
+  // Education
+  if (cvData.education && cvData.education.length > 0) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ISTRUZIONE', margin, yPosition);
+    yPosition += 8;
+
+    cvData.education.forEach(edu => {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(edu.title, margin, yPosition);
+      yPosition += lineHeight;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${edu.institution} - ${edu.location}`, margin, yPosition);
+      yPosition += lineHeight;
+      doc.text(edu.year, margin, yPosition);
+      yPosition += lineHeight + 3;
+    });
+  }
+
+  // References
+  if (cvData.references) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REFERENZE', margin, yPosition);
+    yPosition += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(cvData.references, margin, yPosition);
+  }
+
+  // Save the PDF
+  const filename = `CV_${cvData.personalInfo.name?.replace(/\s+/g, '_') || 'Curriculum'}_${Date.now()}.pdf`;
+  doc.save(filename);
+};
 
 export default function ChatInterface({ language, onBack }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -99,22 +273,12 @@ export default function ChatInterface({ language, onBack }: ChatInterfaceProps) 
 
       if (error) throw error;
 
-      // Create and download CV as JSON for now (later can be PDF)
-      const cvBlob = new Blob([JSON.stringify(data.cv, null, 2)], { 
-        type: 'application/json' 
-      });
-      const url = URL.createObjectURL(cvBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `CV_${Date.now()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Generate and download PDF
+      generatePDF(data.cv);
 
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Perfetto! Il tuo CV è stato generato e scaricato. Puoi aprire il file per vedere tutte le informazioni strutturate in formato professionale.' 
+        content: 'Perfetto! Il tuo CV è stato generato e scaricato in formato PDF. Il file contiene tutte le tue informazioni formattate professionalmente per il mercato del lavoro italiano.' 
       }]);
     } catch (error) {
       console.error('Error generating CV:', error);
@@ -148,7 +312,7 @@ export default function ChatInterface({ language, onBack }: ChatInterfaceProps) 
           ) : (
             <Download className="w-4 h-4 mr-2" />
           )}
-          Genera CV
+          Genera CV PDF
         </Button>
       </div>
 
