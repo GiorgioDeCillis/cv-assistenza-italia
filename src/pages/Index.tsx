@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import LanguageSelector from '@/components/LanguageSelector';
 import ChatInterface from '@/components/ChatInterface';
 import heroImage from '@/assets/hero-image.jpg';
