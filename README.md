@@ -18,7 +18,7 @@ L'applicazione offre un'interfaccia conversazionale multilingue che guida gli ut
 
 ### 🌍 Supporto Multilingue
 - **+99 lingue supportate**: tra cui Italiano, Inglese, Spagnolo, Francese, Arabo, Rumeno, Polacco, Ucraino
-- Interface utente localizzata con nomi nativi delle lingue
+- Interfaccia utente localizzata con nomi nativi delle lingue
 - Chat AI che comunica nella lingua dell'utente ma genera CV in italiano
 
 ### 🤖 Assistente AI Intelligente
