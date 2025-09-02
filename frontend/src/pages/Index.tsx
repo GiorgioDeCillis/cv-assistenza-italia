@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import LanguageSelector from '@/components/LanguageSelector';
 import ChatInterface from '@/components/ChatInterface';
-import heroImage from '@/assets/hero-image.jpg';
 
 interface Language {
   code: string;
@@ -28,7 +27,7 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-hero opacity-90"></div>
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-30"
-          style={{ backgroundImage: `url(${heroImage})` }}
+          style={{ backgroundImage: `url(https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1)` }}
         ></div>
         <div className="relative z-10 container mx-auto px-4 py-20 text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 shadow-glow">
